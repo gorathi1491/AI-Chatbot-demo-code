@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContentBot Pro - AI Chatbot for Subscription Agencies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .chat-bubble { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .typing-indicator {
+            animation: pulse 1.5s infinite;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white p-4 shadow-lg">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                    <span class="text-purple-600 font-bold text-sm">CB</span>
+                </div>
+                <h1 class="text-xl font-bold">ContentBot Pro</h1>
+            </div>
+            <div class="flex space-x-4">
+                <button onclick="showDemo()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors">Demo</button>
+                <button onclick="showAdmin()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors">Admin</button>
+                <button onclick="showAnalytics()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors">Analytics</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Demo Section -->
+        <div id="demoSection" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Chat Interface -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4">
+                    <h2 class="text-lg font-semibold">Live Chat Demo</h2>
+                    <p class="text-sm opacity-90">Experience our AI chatbot in action</p>
+                </div>
+                
+                <div id="chatContainer" class="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                    <div class="chat-bubble flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">AI</div>
+                        <div class="bg-white p-3 rounded-lg shadow-sm max-w-xs">
+                            <p class="text-sm">Hi! I'm your content subscription assistant. I can help you discover our premium content, answer questions about our tiers, and find the perfect subscription for your needs. What brings you here today?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t bg-white">
+                    <div class="flex space-x-2">
+                        <input type="text" id="userInput" placeholder="Type your message..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <button onclick="sendMessage()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">Send</button>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        <button onclick="quickReply('What subscription tiers do you offer?')" class="bg-gray-100 hover:bg-gray-200 text-sm px-3 py-1 rounded-full transition-colors">Subscription Tiers</button>
+                        <button onclick="quickReply('Tell me about premium content')" class="bg-gray-100 hover:bg-gray-200 text-sm px-3 py-1 rounded-full transition-colors">Premium Content</button>
+                        <button onclick="quickReply('I need help with billing')" class="bg-gray-100 hover:bg-gray-200 text-sm px-3 py-1 rounded-full transition-colors">Billing Support</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lead Qualification Panel -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800">Lead Qualification</h3>
+                <div id="leadInfo" class="space-y-3">
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm font-medium text-gray-600">Interest Level</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                            <div id="interestBar" class="bg-green-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm font-medium text-gray-600">Engagement Score</p>
+                        <p id="engagementScore" class="text-2xl font-bold text-purple-600">0</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm font-medium text-gray-600">Detected Intent</p>
+                        <p id="detectedIntent" class="text-sm text-gray-800">Browsing</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm font-medium text-gray-600">Recommended Action</p>
+                        <p id="recommendedAction" class="text-sm text-gray-800">Continue conversation</p>
+                    </div>
+                </div>
+                
+                <button id="transferBtn" onclick="transferToHuman()" class="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg transition-colors opacity-50 cursor-not-allowed" disabled>
+                    Transfer to Human Agent
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminSection" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Content Management -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Content Management</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bot Persona</label>
+                            <select id="botPersona" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="friendly">Friendly & Helpful</option>
+                                <option value="professional">Professional & Direct</option>
+                                <option value="casual">Casual & Conversational</option>
+                                <option value="expert">Expert & Authoritative</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Subscription Tiers</label>
+                            <textarea id="subscriptionTiers" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Basic: $9/month - Access to standard content&#10;Premium: $19/month - All content + exclusive videos&#10;Pro: $39/month - Everything + 1-on-1 sessions"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Special Offers</label>
+                            <textarea id="specialOffers" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="🎉 Limited Time: 50% off Premium for first 3 months!&#10;💎 Upgrade to Pro and get a free consultation"></textarea>
+                        </div>
+                        <button onclick="updateBotSettings()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors">Update Settings</button>
+                    </div>
+                </div>
+
+                <!-- Conversation Flows -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Conversation Flows</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Welcome Message</label>
+                            <textarea id="welcomeMessage" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">Hi! I'm your content subscription assistant. I can help you discover our premium content, answer questions about our tiers, and find the perfect subscription for your needs. What brings you here today?</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Upsell Triggers</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" checked class="mr-2"> Mention premium content after 3 messages
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" checked class="mr-2"> Offer discount for high engagement
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" checked class="mr-2"> Suggest upgrade based on interests
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Lead Qualification Threshold</label>
+                            <input type="range" id="qualificationThreshold" min="0" max="100" value="70" class="w-full">
+                            <p class="text-sm text-gray-600 mt-1">Transfer to human at <span id="thresholdValue">70</span>% engagement</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Dashboard -->
+        <div id="analyticsSection" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h4 class="text-sm font-medium text-gray-600">Total Conversations</h4>
+                    <p class="text-3xl font-bold text-purple-600 mt-2">1,247</p>
+                    <p class="text-sm text-green-600 mt-1">↑ 12% from last week</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h4 class="text-sm font-medium text-gray-600">Qualified Leads</h4>
+                    <p class="text-3xl font-bold text-blue-600 mt-2">89</p>
+                    <p class="text-sm text-green-600 mt-1">↑ 8% conversion rate</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h4 class="text-sm font-medium text-gray-600">Upsells Generated</h4>
+                    <p class="text-3xl font-bold text-green-600 mt-2">34</p>
+                    <p class="text-sm text-green-600 mt-1">$2,890 revenue</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h4 class="text-sm font-medium text-gray-600">Avg. Engagement</h4>
+                    <p class="text-3xl font-bold text-orange-600 mt-2">4.2</p>
+                    <p class="text-sm text-gray-600 mt-1">messages per session</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Recent Conversations</h3>
+                    <div class="space-y-3">
+                        <div class="border-l-4 border-green-500 pl-4 py-2">
+                            <p class="font-medium text-sm">High-value lead identified</p>
+                            <p class="text-xs text-gray-600">User interested in Pro tier - Transferred to sales</p>
+                            <p class="text-xs text-gray-500">2 minutes ago</p>
+                        </div>
+                        <div class="border-l-4 border-blue-500 pl-4 py-2">
+                            <p class="font-medium text-sm">Successful upsell</p>
+                            <p class="text-xs text-gray-600">Basic user upgraded to Premium</p>
+                            <p class="text-xs text-gray-500">15 minutes ago</p>
+                        </div>
+                        <div class="border-l-4 border-yellow-500 pl-4 py-2">
+                            <p class="font-medium text-sm">Support query resolved</p>
+                            <p class="text-xs text-gray-600">Billing question answered automatically</p>
+                            <p class="text-xs text-gray-500">1 hour ago</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Webhook Configuration</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Webhook URL</label>
+                            <input type="url" placeholder="https://your-crm.com/webhook" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Events to Send</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" checked class="mr-2"> Lead qualified
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" checked class="mr-2"> Conversation ended
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="mr-2"> Upsell opportunity
+                                </label>
+                            </div>
+                        </div>
+                        <button class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors">Test Webhook</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let conversationState = {
+            messageCount: 0,
+            engagementScore: 0,
+            interestLevel: 0,
+            detectedIntent: 'browsing',
+            userProfile: {},
+            conversationHistory: []
+        };
+
+        // Bot responses database
+        const botResponses = {
+            greeting: [
+                "Hi! I'm your content subscription assistant. I can help you discover our premium content, answer questions about our tiers, and find the perfect subscription for your needs. What brings you here today?",
+                "Welcome! I'm here to help you find the perfect content subscription. Whether you're looking for our latest offerings or have questions about pricing, I've got you covered. How can I assist you?",
+                "Hello there! Ready to explore our amazing content library? I can walk you through our subscription options and help you find exactly what you're looking for. What interests you most?"
+            ],
+            subscriptionTiers: [
+                "We offer three fantastic tiers:\n\n📱 **Basic ($9/month)**: Access to our core content library with weekly updates\n\n⭐ **Premium ($19/month)**: Everything in Basic plus exclusive videos, early access, and monthly live sessions\n\n💎 **Pro ($39/month)**: All Premium features plus 1-on-1 consultations and custom content requests\n\nWhich tier sounds most interesting to you?",
+                "Great question! Here's what we offer:\n\n🌟 **Basic Plan** - $9/month: Perfect for getting started with our essential content\n🚀 **Premium Plan** - $19/month: Our most popular choice with exclusive perks\n👑 **Pro Plan** - $39/month: The ultimate experience for serious content consumers\n\nI'd love to help you choose the right fit. What type of content are you most interested in?"
+            ],
+            premiumContent: [
+                "Our premium content is truly special! 🌟 You'll get:\n\n• Exclusive video series not available anywhere else\n• Behind-the-scenes content from industry experts\n• Interactive workshops and masterclasses\n• Early access to new releases (up to 2 weeks early!)\n• Monthly live Q&A sessions\n\nPlus, we're currently offering 50% off your first 3 months of Premium! Would you like me to help you get started?",
+                "I'm excited to tell you about our premium offerings! 💎\n\nOur premium subscribers get access to our vault of exclusive content, including expert interviews, detailed case studies, and step-by-step tutorials you won't find anywhere else. We also host monthly virtual events where you can network with other subscribers.\n\nWhat type of premium content would be most valuable for your goals?"
+            ],
+            upsell: [
+                "Based on our conversation, I think you'd really love our Premium tier! 🚀 It includes everything you've mentioned plus exclusive content that's perfect for your interests. And right now, I can offer you 50% off your first 3 months - that's just $9.50/month instead of $19. Would you like to upgrade?",
+                "You seem really engaged with our content! 🌟 I'd love to offer you an exclusive deal on our Premium subscription - 3 months for the price of 1, plus a bonus consultation session. This offer is only available through our chat, and I think you'd get tremendous value from the premium features. Interested?",
+                "I can see you're serious about getting the most from our platform! 💎 Our Pro tier might be perfect for you - it includes everything we've discussed plus personalized content recommendations and direct access to our expert team. I can offer you a special 30% discount if you upgrade today. What do you think?"
+            ],
+            support: [
+                "I'm here to help with any support questions! 🛟 For billing issues, I can:\n\n• Check your current subscription status\n• Help with payment method updates\n• Process refunds or cancellations\n• Explain charges on your account\n\nWhat specific billing question can I help you with?",
+                "No problem! I handle all kinds of support requests. Whether it's technical issues, account questions, or billing concerns, I'm here to help. Can you tell me more about what you're experiencing?",
+                "Support is my specialty! 💪 I can help with account issues, technical problems, billing questions, or anything else you need. What's going on?"
+            ]
+        };
+
+        // Utility functions
+        function getRandomResponse(category) {
+            const responses = botResponses[category];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function updateEngagementMetrics() {
+            conversationState.messageCount++;
+            conversationState.engagementScore = Math.min(100, conversationState.engagementScore + 15);
+            
+            // Update UI
+            document.getElementById('engagementScore').textContent = conversationState.engagementScore;
+            document.getElementById('interestBar').style.width = conversationState.interestLevel + '%';
+            
+            // Check for transfer threshold
+            if (conversationState.engagementScore >= 70) {
+                document.getElementById('transferBtn').disabled = false;
+                document.getElementById('transferBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('recommendedAction').textContent = 'Ready for human transfer';
+            }
+        }
+
+        function analyzeUserIntent(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('tier') || lowerMessage.includes('subscription')) {
+                conversationState.detectedIntent = 'pricing_inquiry';
+                conversationState.interestLevel = Math.min(100, conversationState.interestLevel + 25);
+                return 'subscriptionTiers';
+            } else if (lowerMessage.includes('premium') || lowerMessage.includes('exclusive') || lowerMessage.includes('upgrade')) {
+                conversationState.detectedIntent = 'premium_interest';
+                conversationState.interestLevel = Math.min(100, conversationState.interestLevel + 30);
+                return 'premiumContent';
+            } else if (lowerMessage.includes('billing') || lowerMessage.includes('payment') || lowerMessage.includes('help') || lowerMessage.includes('support')) {
+                conversationState.detectedIntent = 'support_needed';
+                conversationState.interestLevel = Math.min(100, conversationState.interestLevel + 10);
+                return 'support';
+            } else if (conversationState.messageCount > 3 && conversationState.engagementScore > 50) {
+                conversationState.detectedIntent = 'upsell_opportunity';
+                conversationState.interestLevel = Math.min(100, conversationState.interestLevel + 20);
+                return 'upsell';
+            }
+            
+            return 'general';
+        }
+
+        function addMessage(sender, message, isTyping = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-bubble flex items-start space-x-3';
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">U</div>
+                    <div class="bg-blue-600 text-white p-3 rounded-lg shadow-sm max-w-xs ml-auto">
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+                messageDiv.classList.add('flex-row-reverse');
+            } else {
+                const typingClass = isTyping ? 'typing-indicator' : '';
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold ${typingClass}">AI</div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm max-w-xs">
+                        <p class="text-sm">${isTyping ? 'Typing...' : message}</p>
+                    </div>
+                `;
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage('user', message);
+            input.value = '';
+            
+            // Store in conversation history
+            conversationState.conversationHistory.push({
+                sender: 'user',
+                message: message,
+                timestamp: new Date()
+            });
+            
+            // Show typing indicator
+            const typingMessage = addMessage('bot', '', true);
+            
+            // Simulate processing delay
+            setTimeout(() => {
+                typingMessage.remove();
+                
+                // Analyze intent and generate response
+                const intent = analyzeUserIntent(message);
+                let response;
+                
+                if (intent === 'general') {
+                    response = "That's interesting! I'd love to help you find the perfect content subscription. Are you looking for information about our pricing tiers, premium content, or do you have a specific question I can help with?";
+                } else {
+                    response = getRandomResponse(intent);
+                }
+                
+                // Add bot response
+                addMessage('bot', response);
+                
+                // Update metrics
+                updateEngagementMetrics();
+                document.getElementById('detectedIntent').textContent = conversationState.detectedIntent.replace('_', ' ');
+                
+                // Store bot response
+                conversationState.conversationHistory.push({
+                    sender: 'bot',
+                    message: response,
+                    timestamp: new Date()
+                });
+                
+            }, 1000 + Math.random() * 1000);
+        }
+
+        function quickReply(message) {
+            document.getElementById('userInput').value = message;
+            sendMessage();
+        }
+
+        function transferToHuman() {
+            addMessage('bot', "Perfect! I'm connecting you with one of our human specialists who can provide personalized assistance. They'll be with you shortly and will have access to our full conversation. Thanks for your patience! 👨‍💼");
+            
+            // Simulate webhook call
+            const webhookData = {
+                leadQualified: true,
+                engagementScore: conversationState.engagementScore,
+                conversationSummary: conversationState.conversationHistory,
+                detectedIntent: conversationState.detectedIntent,
+                recommendedAction: 'High-value lead - immediate follow-up recommended'
+            };
+            
+            console.log('Webhook data sent:', webhookData);
+            alert('Lead transferred to human agent! (In production, this would trigger your CRM webhook)');
+        }
+
+        function showDemo() {
+            document.getElementById('demoSection').classList.remove('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+            document.getElementById('analyticsSection').classList.add('hidden');
+        }
+
+        function showAdmin() {
+            document.getElementById('demoSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.remove('hidden');
+            document.getElementById('analyticsSection').classList.add('hidden');
+        }
+
+        function showAnalytics() {
+            document.getElementById('demoSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+            document.getElementById('analyticsSection').classList.remove('hidden');
+        }
+
+        function updateBotSettings() {
+            const persona = document.getElementById('botPersona').value;
+            const tiers = document.getElementById('subscriptionTiers').value;
+            const offers = document.getElementById('specialOffers').value;
+            
+            alert(`Settings updated!\nPersona: ${persona}\nTiers and offers have been saved.`);
+        }
+
+        // Event listeners
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        document.getElementById('qualificationThreshold').addEventListener('input', function(e) {
+            document.getElementById('thresholdValue').textContent = e.target.value;
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showDemo();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96282320a35d80c8',t:'MTc1MzA3NDA1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
